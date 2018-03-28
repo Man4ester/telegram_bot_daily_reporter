@@ -26,7 +26,7 @@ public class Main {
         ApplicationContext ctx =
                 new AnnotationConfigApplicationContext(AppConfig.class);
 
-        //startDailyReportReminder(configService, ctx);
+        startDailyReportReminder(configService, ctx);
         startReporter(configService, ctx);
 
 
