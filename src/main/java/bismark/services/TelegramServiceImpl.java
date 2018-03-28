@@ -9,6 +9,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ import java.util.List;
 @Service
 @Qualifier("telegramServiceImpl")
 public class TelegramServiceImpl implements ITelegramService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramServiceImpl.class);
 
     @Value("${telegramURL}")
     private String telegramURL;
@@ -72,6 +76,7 @@ public class TelegramServiceImpl implements ITelegramService {
 
     @Override
     public HttpResponse callToTelegramAPI(String url, List<NameValuePair> urlParameters) {
+        LOGGER.info("callToTelegramAPI");
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             HttpPost post = new HttpPost(url);
             post.setHeader("User-Agent", userAgent);
@@ -83,13 +88,14 @@ public class TelegramServiceImpl implements ITelegramService {
             return httpclient.execute(post);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             return null;
         }
     }
 
     @Override
     public String getResponseFromTelegramAPI(String url, List<NameValuePair> urlParameters) {
+        LOGGER.info("getResponseFromTelegramAPI");
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             HttpPost post = new HttpPost(url);
             post.setHeader("User-Agent", userAgent);
@@ -112,7 +118,7 @@ public class TelegramServiceImpl implements ITelegramService {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             return null;
         }
     }

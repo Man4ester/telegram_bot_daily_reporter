@@ -3,6 +3,8 @@ package bismark.workers;
 import bismark.services.ConfigServiceImpl;
 import bismark.services.interfaces.IConfigService;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Date;
@@ -12,6 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ReminderWorker implements Runnable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReminderWorker.class);
 
     private long localTimeoutMinutes;
     private DateTime start;
@@ -33,6 +37,7 @@ public class ReminderWorker implements Runnable {
 
     @Override
     public void run() {
+        LOGGER.info("start");
 
         boolean active = true;
 
@@ -50,12 +55,13 @@ public class ReminderWorker implements Runnable {
 
                 TimeUnit.MINUTES.sleep(localTimeoutMinutes);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             }
         }
     }
 
     private void sendMessageToRecipients() {
+        LOGGER.info("sendMessageToRecipients");
         for (Long recipientId : configService.loadRecipients(properties)) {
             ExecutorService executor = Executors.newFixedThreadPool(1);
             executor.submit(new TelegramSenderWorker(recipientId, configService.getReminderMessage(properties), ctx));

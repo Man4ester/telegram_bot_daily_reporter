@@ -6,6 +6,8 @@ import bismark.services.interfaces.IMessageService;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +19,11 @@ import java.util.List;
 @Qualifier("messageServiceImpl")
 public class MessageServiceImpl implements IMessageService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageServiceImpl.class);
+
     @Override
     public List<Message> readMessagesFromJSON(JSONObject json) {
+        LOGGER.info("readMessagesFromJSON");
         List<Message> messages = new ArrayList<>();
 
         if (null == json) {
@@ -42,6 +47,7 @@ public class MessageServiceImpl implements IMessageService {
 
     @Override
     public Message getMessageFromJSONObject(JSONObject jsonObject) {
+        LOGGER.info("getMessageFromJSONObject");
         Message message = new Message();
         Sender sender = new Sender();
 

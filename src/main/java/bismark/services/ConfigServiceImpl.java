@@ -4,6 +4,8 @@ import bismark.models.TimeReminder;
 import bismark.services.interfaces.IConfigService;
 import bismark.utils.ConfigHolder;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ConfigServiceImpl implements IConfigService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigServiceImpl.class);
 
     @Override
     public Properties loadProperties() {
@@ -26,7 +30,7 @@ public class ConfigServiceImpl implements IConfigService {
             prop.load(input);
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         } finally {
             if (input != null) {
                 try {

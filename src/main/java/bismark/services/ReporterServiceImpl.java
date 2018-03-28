@@ -9,6 +9,8 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ import java.util.function.Consumer;
 @Service
 @Qualifier("reporterServiceImpl")
 public class ReporterServiceImpl implements IReporterService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReporterServiceImpl.class);
 
     public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -52,7 +56,10 @@ public class ReporterServiceImpl implements IReporterService {
     @Override
     public void storeReportFromMessages(List<Message> messages, Map<Long, String> username) {
 
+        LOGGER.info("storeReportFromMessages");
+
         if (messages.isEmpty()) {
+            LOGGER.warn("No messages");
             return;
         }
 
@@ -73,7 +80,7 @@ public class ReporterServiceImpl implements IReporterService {
 
 
         } catch (Exception e) {
-            System.out.print(e);
+            LOGGER.error(e.getMessage());
         }
 
 
@@ -107,6 +114,7 @@ public class ReporterServiceImpl implements IReporterService {
 
     @Override
     public void generateHTMLReport() {
+        LOGGER.info("generateHTMLReport");
         Map<String, List<String>> row = readRowForTodayFromDB();
         Path path = Paths.get(reportPath + generateReportFileName());
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
@@ -120,7 +128,7 @@ public class ReporterServiceImpl implements IReporterService {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -153,7 +161,7 @@ public class ReporterServiceImpl implements IReporterService {
             });
 
         } catch (Exception e) {
-            System.out.print(e);
+            LOGGER.error(e.getMessage());
         }
         return row;
     }

@@ -4,6 +4,8 @@ import bismark.services.interfaces.IConfigService;
 import bismark.workers.ReminderWorker;
 import bismark.workers.TelegramReaderWorker;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -16,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
 
@@ -23,13 +26,14 @@ public class Main {
         ApplicationContext ctx =
                 new AnnotationConfigApplicationContext(AppConfig.class);
 
-        startDailyReportReminder(configService, ctx);
+        //startDailyReportReminder(configService, ctx);
         startReporter(configService, ctx);
 
 
     }
 
     private static void startDailyReportReminder(IConfigService configService, ApplicationContext ctx) {
+        LOGGER.info("startDailyReportReminder");
         Properties properties = configService.loadProperties();
         Date start = configService.getStartRemindDate(properties).toDate();
         Date end = configService.getEndRemindDate(properties).toDate();
@@ -41,9 +45,11 @@ public class Main {
     }
 
     private static void startReporter(IConfigService configService, ApplicationContext ctx) {
+        LOGGER.info("startReporter");
         Properties properties = configService.loadProperties();
         long delayMinutes = configService.getReporterMinutesDelay(properties, new DateTime());
 
+        LOGGER.info("Will use delay: {} minutes", delayMinutes);
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.schedule(new TelegramReaderWorker(ctx, properties), delayMinutes, TimeUnit.MINUTES);
         executor.shutdown();
