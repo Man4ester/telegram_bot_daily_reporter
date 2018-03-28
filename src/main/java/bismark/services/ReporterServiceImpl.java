@@ -3,6 +3,7 @@ package bismark.services;
 import bismark.models.Message;
 import bismark.models.Ticket;
 import bismark.services.interfaces.IReporterService;
+import bismark.utils.ReporterHolder;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -31,10 +32,6 @@ public class ReporterServiceImpl implements IReporterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReporterServiceImpl.class);
 
     public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
-    public final static String REPORT_NAME = "%s.html";
-
-    public final static String ASSIGNEE = "<br><br><b>%s</b></br>";
 
 
     @Value("${mongo.host}")
@@ -69,7 +66,7 @@ public class ReporterServiceImpl implements IReporterService {
             MongoCollection collection = database.getCollection(dbCollection);
 
             for (Message m : messages) {
-                String[] lines = m.getText().split("\n");
+                String[] lines = m.getText().split(ReporterHolder.NEW_LINE);
                 for (int i = 0; i < lines.length; i++) {
                     Ticket ticket = getTicketFromString(lines[i]);
                     documents.add(createDocumentFromMessageTicket(m, ticket, username));
@@ -88,7 +85,7 @@ public class ReporterServiceImpl implements IReporterService {
 
     @Override
     public Ticket getTicketFromString(String line) {
-        String[] parts = line.split(" - ");
+        String[] parts = line.split(ReporterHolder.PART_SPLITTER);
         Ticket ticket = new Ticket();
         if (parts.length == 3) {
             ticket.setNormalTicket(true);
@@ -98,7 +95,7 @@ public class ReporterServiceImpl implements IReporterService {
             ticket.setStatus(parts[2]);
 
             ticket.setLinkTitle(getTicketTitleFromLink(ticket.getLink()));
-            ticket.setColor(ticket.getLinkTitle().contains("CMC") ? "red" : "black");
+            ticket.setColor(ticket.getLinkTitle().contains(ReporterHolder.CMC) ? ReporterHolder.COLOR_CMC : ReporterHolder.COLOR_NOT_CMC);
         } else {
             ticket.setNormalTicket(false);
             ticket.setTitle(line);
@@ -108,7 +105,7 @@ public class ReporterServiceImpl implements IReporterService {
 
     @Override
     public String getTicketTitleFromLink(String link) {
-        String[] parts = link.split("/");
+        String[] parts = link.split(ReporterHolder.URL_SPLITTER);
         return parts[parts.length - 1];
     }
 
@@ -122,7 +119,7 @@ public class ReporterServiceImpl implements IReporterService {
                 String assignee = r.getKey();
                 List<String> tickets = r.getValue();
 
-                writer.write(String.format(ASSIGNEE, assignee));
+                writer.write(String.format(ReporterHolder.ASSIGNEE_TEMPLATE, assignee));
                 for (String ticket : tickets) {
                     writer.write(ticket);
                 }
@@ -134,13 +131,12 @@ public class ReporterServiceImpl implements IReporterService {
 
     private String generateReportFileName() {
         DateTime today = new DateTime();
-        return String.format(REPORT_NAME, DATE_FORMAT.format(today.toDate()));
+        return String.format(ReporterHolder.REPORT_NAME, DATE_FORMAT.format(today.toDate()));
     }
 
     private Map<String, List<String>> readRowForTodayFromDB() {
         Map<String, List<String>> row = new HashMap<>();
         try (MongoClient mongoClient = new MongoClient(dbHost, port)) {
-            List<Document> documents = new ArrayList<>();
             MongoDatabase database = mongoClient.getDatabase(dbName);
             MongoCollection collection = database.getCollection(dbCollection);
 
@@ -150,12 +146,12 @@ public class ReporterServiceImpl implements IReporterService {
             today = today.withMillisOfDay(0);
 
 
-            collection.find(Filters.gt("date", today.toDate())).forEach((Consumer<? super Document>) (Document doc) -> {
-                if (row.get(doc.getString("assignee")) != null) {
-                    row.get(doc.getString("assignee")).add(doc.getString("ticket"));
+            collection.find(Filters.gt(ReporterHolder.DATE, today.toDate())).forEach((Consumer<? super Document>) (Document doc) -> {
+                if (row.get(doc.getString(ReporterHolder.ASSIGNEE)) != null) {
+                    row.get(doc.getString(ReporterHolder.ASSIGNEE)).add(doc.getString(ReporterHolder.TICKET));
                 } else {
-                    row.put(doc.getString("assignee"), new ArrayList<>());
-                    row.get(doc.getString("assignee")).add(doc.getString("ticket"));
+                    row.put(doc.getString(ReporterHolder.ASSIGNEE), new ArrayList<>());
+                    row.get(doc.getString(ReporterHolder.ASSIGNEE)).add(doc.getString(ReporterHolder.TICKET));
                 }
 
             });
@@ -170,9 +166,9 @@ public class ReporterServiceImpl implements IReporterService {
         Document document = new Document();
 
         String userName = username.get(message.getSender().getId());
-        document.put("assignee", null != userName ? userName : "");
-        document.put("ticket", ticket.toString());
-        document.put("date", new Date());
+        document.put(ReporterHolder.ASSIGNEE, null != userName ? userName : "");
+        document.put(ReporterHolder.TICKET, ticket.toString());
+        document.put(ReporterHolder.DATE, new Date());
 
         return document;
     }

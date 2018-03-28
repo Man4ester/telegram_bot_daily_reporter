@@ -3,6 +3,7 @@ package bismark.services;
 import bismark.models.Message;
 import bismark.models.Sender;
 import bismark.services.interfaces.IMessageService;
+import bismark.utils.MessageHolder;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,11 +31,11 @@ public class MessageServiceImpl implements IMessageService {
             return messages;
         }
 
-        if (!json.has("result")) {
+        if (!json.has(MessageHolder.RESULT)) {
             return messages;
         }
 
-        JSONArray allMessages = json.getJSONArray("result");
+        JSONArray allMessages = json.getJSONArray(MessageHolder.RESULT);
         for (int i = 0; i < allMessages.length(); i++) {
             JSONObject singleJsonMessage = allMessages.getJSONObject(i);
             Message message = getMessageFromJSONObject(singleJsonMessage);
@@ -55,22 +56,22 @@ public class MessageServiceImpl implements IMessageService {
             return null;
         }
 
-        JSONObject jsonMessage = jsonObject.getJSONObject("message");
-        JSONObject jsonSender = jsonMessage.getJSONObject("from");
+        JSONObject jsonMessage = jsonObject.getJSONObject(MessageHolder.MESSAGE);
+        JSONObject jsonSender = jsonMessage.getJSONObject(MessageHolder.FROM);
 
-        sender.setId(jsonSender.getLong("id"));
-        sender.setFirstName(jsonSender.getString("first_name"));
-        sender.setLastName(jsonMessage.has("last_name") ? jsonSender.getString("last_name") : "");
+        sender.setId(jsonSender.getLong(MessageHolder.ID));
+        sender.setFirstName(jsonSender.getString(MessageHolder.FIRST_NAME));
+        sender.setLastName(jsonMessage.has(MessageHolder.LAST_NAME) ? jsonSender.getString(MessageHolder.LAST_NAME) : "");
 
-        message.setUpdateId(jsonObject.getLong("update_id"));
-        message.setCreatedDate(jsonMessage.getLong("date"));
-        if (!jsonMessage.has("text")) {
+        message.setUpdateId(jsonObject.getLong(MessageHolder.UPDATE_ID));
+        message.setCreatedDate(jsonMessage.getLong(MessageHolder.DATE));
+        if (!jsonMessage.has(MessageHolder.TEXT)) {
             return null;
         }
 
-        message.setText(formatText(jsonMessage.getString("text")));
+        message.setText(formatText(jsonMessage.getString(MessageHolder.TEXT)));
 
-        message.setId(jsonMessage.getLong("message_id"));
+        message.setId(jsonMessage.getLong(MessageHolder.MESSAGE_ID));
         message.setSender(sender);
 
         return message;
@@ -96,14 +97,14 @@ public class MessageServiceImpl implements IMessageService {
             return false;
         }
 
-        if (!message.getText().contains("jira")) {
+        if (!message.getText().contains(MessageHolder.JIRA)) {
             return false;
         }
         return true;
     }
 
     private String formatText(String txt) {
-        String text = txt.replaceAll("https", "\nhttps");
+        String text = txt.replaceAll(MessageHolder.HTTPS, MessageHolder.HTTPS_NORMAL);
 
         return text.substring(1, text.length());
     }

@@ -1,6 +1,7 @@
 package bismark.services;
 
 import bismark.services.interfaces.ITelegramService;
+import bismark.utils.TelegramHolder;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -40,12 +41,12 @@ public class TelegramServiceImpl implements ITelegramService {
 
     @Override
     public String getUrlForSendMessage() {
-        return String.format(telegramURL, "sendMessage");
+        return String.format(telegramURL, TelegramHolder.SEND_MESSAGE);
     }
 
     @Override
     public String getUrlForReadMessage() {
-        return String.format(telegramURL, "getUpdates");
+        return String.format(telegramURL, TelegramHolder.GET_UPDATES);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class TelegramServiceImpl implements ITelegramService {
         LOGGER.info("callToTelegramAPI");
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             HttpPost post = new HttpPost(url);
-            post.setHeader("User-Agent", userAgent);
+            post.setHeader(TelegramHolder.USER_AGENT, userAgent);
 
             if (!urlParameters.isEmpty()) {
                 post.setEntity(new UrlEncodedFormEntity(urlParameters));
@@ -98,7 +99,7 @@ public class TelegramServiceImpl implements ITelegramService {
         LOGGER.info("getResponseFromTelegramAPI");
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             HttpPost post = new HttpPost(url);
-            post.setHeader("User-Agent", userAgent);
+            post.setHeader(TelegramHolder.USER_AGENT, userAgent);
 
             if (!urlParameters.isEmpty()) {
                 post.setEntity(new UrlEncodedFormEntity(urlParameters));
@@ -125,8 +126,8 @@ public class TelegramServiceImpl implements ITelegramService {
 
     private List<NameValuePair> addVariablesForRequest(long userId, String message) {
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-        urlParameters.add(new BasicNameValuePair("chat_id", String.valueOf(userId)));
-        urlParameters.add(new BasicNameValuePair("text", message));
+        urlParameters.add(new BasicNameValuePair(TelegramHolder.CHAT_ID, String.valueOf(userId)));
+        urlParameters.add(new BasicNameValuePair(TelegramHolder.TEXT, message));
 
         return urlParameters;
     }
