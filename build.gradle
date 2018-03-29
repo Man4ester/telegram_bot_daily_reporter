@@ -1,13 +1,36 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.6.RELEASE'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
 group 'Bot'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
 
 sourceCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Daily reporter',
+                'Main-Class': 'bismark.Main'
+    }
+    archiveName 'daily-reporter.jar'
+}
 
 repositories {
     mavenCentral()
 }
+
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -19,7 +42,8 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-core', version: '5.0.4.RELEASE'
     compile group: 'org.springframework', name: 'spring-beans', version: '5.0.4.RELEASE'
     compile group: 'org.springframework', name: 'spring-context', version: '5.0.4.RELEASE'
-    compile 'slf4j-log4j12:log4j-api:2.7'
+    //compile 'slf4j-log4j12:log4j-api:2.7.0'
+    compile 'org.springframework.boot:spring-boot-starter'
     compile 'org.apache.logging.log4j:log4j-core:2.7'
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.7'
 

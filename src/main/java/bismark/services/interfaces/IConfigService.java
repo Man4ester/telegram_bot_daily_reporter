@@ -5,46 +5,40 @@ import org.joda.time.DateTime;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public interface IConfigService {
 
     /**
-     * Load all Properties
-     * @return {@link Properties}
-     */
-    Properties loadProperties();
-
-    /**
      * Load list with ID's of recipients
-     * @param properties - source for reading data
+     *
      * @return - list with ID's
      */
-    List<Long> loadRecipients(Properties properties);
+    List<Long> loadRecipients();
 
     /**
      * Load message from setting what will be used to remind
-     * @param properties - source for data
+     *
      * @return - message from config
      */
-    String getReminderMessage(Properties properties);
+    String getReminderMessage();
 
     /**
      * Load start date for reminder.
-     * @param properties - source for reading data
+     *
      * @return - {@link DateTime} with date
      */
-    DateTime getStartRemindDate(Properties properties);
+    DateTime getStartRemindDate();
 
     /**
      * Load end date for reminder.
-     * @param properties - source for reading data
+     *
      * @return {@link DateTime} with date
      */
-    DateTime getEndRemindDate(Properties properties);
+    DateTime getEndRemindDate();
 
     /**
      * Convert {@link String} to {@link TimeReminder} to get more easy way to work with date
+     *
      * @param str - source
      * @return - {@link TimeReminder}
      */
@@ -52,30 +46,30 @@ public interface IConfigService {
 
     /**
      * Simple way to read delay
-     * @param properties
+     *
      * @param currentTime
      * @return delay for worker
      */
-    long getReporterMinutesDelay(Properties properties, DateTime currentTime);
+    long getReporterMinutesDelay(DateTime currentTime);
 
     /**
      * Simple way to read interval
-     * @param properties
+     *
      * @return interval for reminder
      */
-    long getReminderInterval(Properties properties);
+    long getReminderInterval();
 
     /**
      * Simple way to read admin ID from settings
-     * @param properties
+     *
      * @return id for admin
      */
-    long getAdminTelegramId(Properties properties);
+    long getAdminTelegramId();
 
     /**
      * Load map with id <=> username for report
-     * @param properties
+     *
      * @return map with correct format
      */
-    Map<Long, String> loadUsersForReport(Properties properties);
+    Map<Long, String> loadUsersForReport();
 }

@@ -16,25 +16,24 @@ public class ReporterWorker implements Runnable {
 
     private ApplicationContext ctx;
 
-    private Properties properties;
 
-    private IConfigService configService = new ConfigServiceImpl();
+    private IConfigService configService;
 
-    public ReporterWorker(ApplicationContext ctx, Properties properties) {
+    public ReporterWorker(ApplicationContext ctx) {
         this.ctx = ctx;
-        this.properties = properties;
     }
 
     @Override
     public void run() {
         LOGGER.info("START");
+        configService = ctx.getBean(ConfigServiceImpl.class);
 
         ReporterServiceImpl reporterService = ctx.getBean(ReporterServiceImpl.class);
         reporterService.generateHTMLReport();
 
 
         TelegramServiceImpl telegramService = ctx.getBean(TelegramServiceImpl.class);
-        telegramService.sendMessageToAdminAfterReportGenerated(configService.getAdminTelegramId(properties));
+        telegramService.sendMessageToAdminAfterReportGenerated(configService.getAdminTelegramId());
 
     }
 }

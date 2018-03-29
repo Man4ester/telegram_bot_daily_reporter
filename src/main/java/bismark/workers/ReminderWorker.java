@@ -21,14 +21,12 @@ public class ReminderWorker implements Runnable {
     private DateTime start;
     private DateTime end;
 
-    private Properties properties;
 
-    IConfigService configService = new ConfigServiceImpl();
+    IConfigService configService;
 
     private ApplicationContext ctx;
 
-    public ReminderWorker(Properties properties, long timeout, Date dateFrom, Date dateTo, ApplicationContext ctx) {
-        this.properties = properties;
+    public ReminderWorker(long timeout, Date dateFrom, Date dateTo, ApplicationContext ctx) {
         this.localTimeoutMinutes = timeout;
         this.start = new DateTime(dateFrom);
         this.end = new DateTime(dateTo);
@@ -38,6 +36,7 @@ public class ReminderWorker implements Runnable {
     @Override
     public void run() {
         LOGGER.info("START");
+        configService = ctx.getBean(ConfigServiceImpl.class);
 
         boolean active = true;
 
@@ -63,10 +62,10 @@ public class ReminderWorker implements Runnable {
 
     private void sendMessageToRecipients() {
         LOGGER.info("sendMessageToRecipients");
-        for (Long recipientId : configService.loadRecipients(properties)) {
+        for (Long recipientId : configService.loadRecipients()) {
             LOGGER.info("WILL SEND REMIND TO: {}", recipientId);
             ExecutorService executor = Executors.newFixedThreadPool(1);
-            executor.submit(new TelegramSenderWorker(recipientId, configService.getReminderMessage(properties), ctx));
+            executor.submit(new TelegramSenderWorker(recipientId, configService.getReminderMessage(), ctx));
             executor.shutdown();
         }
     }

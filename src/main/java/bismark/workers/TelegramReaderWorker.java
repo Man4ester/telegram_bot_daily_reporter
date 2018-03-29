@@ -22,12 +22,9 @@ public class TelegramReaderWorker implements Runnable {
 
     private ApplicationContext ctx;
 
-    private Properties properties;
-
-    public TelegramReaderWorker(ApplicationContext ctx, Properties properties) {
+    public TelegramReaderWorker(ApplicationContext ctx) {
 
         this.ctx = ctx;
-        this.properties = properties;
     }
 
     @Override
@@ -37,17 +34,17 @@ public class TelegramReaderWorker implements Runnable {
         TelegramServiceImpl telegramService = ctx.getBean(TelegramServiceImpl.class);
         ReporterServiceImpl reporterService = ctx.getBean(ReporterServiceImpl.class);
         MessageServiceImpl messageService = ctx.getBean(MessageServiceImpl.class);
-        IConfigService configService = new ConfigServiceImpl();
+        IConfigService configService = ctx.getBean(ConfigServiceImpl.class);
 
         JSONObject json = telegramService.readUpdatesForBot();
 
         List<Message> lst = messageService.readMessagesFromJSON(json);
         LOGGER.info("TOTAL MESSAGES: {}", lst.size());
-        reporterService.storeReportFromMessages(lst, configService.loadUsersForReport(properties));
+        reporterService.storeReportFromMessages(lst, configService.loadUsersForReport());
 
         LOGGER.info("START Report Worker");
         ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.submit(new ReporterWorker(ctx, properties));
+        executor.submit(new ReporterWorker(ctx));
         executor.shutdown();
 
     }

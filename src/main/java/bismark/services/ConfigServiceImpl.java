@@ -6,47 +6,49 @@ import bismark.utils.ConfigHolder;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Service
+@Qualifier("configServiceImpl")
 public class ConfigServiceImpl implements IConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigServiceImpl.class);
 
-    @Override
-    public Properties loadProperties() {
-        Properties prop = new Properties();
-        InputStream input = null;
+    @Value("${startRemindTime}")
+    private String startRemindTime;
 
-        try {
-            String fileName = ConfigHolder.CONFIG_FILE_NAME;
-            ClassLoader classLoader = new ConfigServiceImpl().getClass().getClassLoader();
+    @Value("${recipientsId}")
+    private String recipientsId;
 
-            input = new FileInputStream(classLoader.getResource(fileName).getFile());
-            prop.load(input);
+    @Value("${reminderMessage}")
+    private String reminderMessage;
 
-        } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    LOGGER.error(e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        }
-        return prop;
-    }
+    @Value("${reporterTime}")
+    private String reporterTime;
+
+    @Value("${endRemindTime}")
+    private String endRemindTime;
+
+    @Value("${reminderMinuteInterval}")
+    private String reminderMinuteInterval;
+
+    @Value("${adminId}")
+    private String adminId;
+
+    @Value("${recipientsMap}")
+    private String recipientsMap;
 
     @Override
-    public List<Long> loadRecipients(Properties properties) {
-        String[] ids = properties.getProperty(ConfigHolder.RECIPIENT_LBL).split(ConfigHolder.RECIPIENT_SPLITTER);
+    public List<Long> loadRecipients() {
+        String[] ids = recipientsId.split(ConfigHolder.RECIPIENT_SPLITTER);
         List<Long> recipients = new ArrayList<>();
 
         for (int i = 0; i < ids.length; i++) {
@@ -58,19 +60,19 @@ public class ConfigServiceImpl implements IConfigService {
     }
 
     @Override
-    public String getReminderMessage(Properties properties) {
-        return properties.getProperty(ConfigHolder.REMINDER_MESSAGE_LBL);
+    public String getReminderMessage() {
+        return reminderMessage;
     }
 
     @Override
-    public DateTime getStartRemindDate(Properties properties) {
-        TimeReminder timeReminder = getFromString(properties.getProperty(ConfigHolder.START_REMINDER_TIME_LBL));
+    public DateTime getStartRemindDate() {
+        TimeReminder timeReminder = getFromString(startRemindTime);
         return loadFromTimeReminder(timeReminder);
     }
 
     @Override
-    public DateTime getEndRemindDate(Properties properties) {
-        TimeReminder timeReminder = getFromString(properties.getProperty(ConfigHolder.END_REMINDER_TIME_LBL));
+    public DateTime getEndRemindDate() {
+        TimeReminder timeReminder = getFromString(endRemindTime);
         return loadFromTimeReminder(timeReminder);
     }
 
@@ -84,27 +86,27 @@ public class ConfigServiceImpl implements IConfigService {
     }
 
     @Override
-    public long getReporterMinutesDelay(Properties properties, DateTime currentTime) {
-        TimeReminder tr = getFromString(properties.getProperty(ConfigHolder.REPORTER_TIME_LBL));
+    public long getReporterMinutesDelay(DateTime currentTime) {
+        TimeReminder tr = getFromString(reporterTime);
         DateTime dt = loadFromTimeReminder(tr);
         return TimeUnit.MILLISECONDS.toMinutes(dt.getMillis() - currentTime.getMillis());
     }
 
     @Override
-    public long getReminderInterval(Properties properties) {
-        return Long.parseLong(properties.getProperty(ConfigHolder.REMINDER_INTERVAL_LBL));
+    public long getReminderInterval() {
+        return Long.parseLong(reminderMinuteInterval);
     }
 
     @Override
-    public long getAdminTelegramId(Properties properties) {
-        return Long.parseLong(properties.getProperty(ConfigHolder.ADMIN_IDL_LBL));
+    public long getAdminTelegramId() {
+        return Long.parseLong(adminId);
     }
 
     @Override
-    public Map<Long, String> loadUsersForReport(Properties properties) {
+    public Map<Long, String> loadUsersForReport() {
 
         Map<Long, String> result = new HashMap<>();
-        String[] parts = properties.getProperty(ConfigHolder.RECIPIENTS_LBL).split(ConfigHolder.RECIPIENT_SPLITTER);
+        String[] parts = recipientsMap.split(ConfigHolder.RECIPIENT_SPLITTER);
         for (int i = 0; i < parts.length; i++) {
             String[] subParts = parts[i].split(ConfigHolder.USERNAME_SPLITTER);
             Long id = Long.parseLong(subParts[0]);
