@@ -50,29 +50,38 @@ public class MessageServiceImpl implements IMessageService {
     public Message getMessageFromJSONObject(JSONObject jsonObject) {
         LOGGER.info("getMessageFromJSONObject");
         Message message = new Message();
-        Sender sender = new Sender();
+        try {
+            Sender sender = new Sender();
 
-        if (null == jsonObject) {
+            if (null == jsonObject) {
+                return null;
+            }
+
+            if (!jsonObject.has(MessageHolder.MESSAGE)) {
+                return null;
+            }
+
+            JSONObject jsonMessage = jsonObject.getJSONObject(MessageHolder.MESSAGE);
+            JSONObject jsonSender = jsonMessage.getJSONObject(MessageHolder.FROM);
+
+            sender.setId(jsonSender.getLong(MessageHolder.ID));
+            sender.setFirstName(jsonSender.getString(MessageHolder.FIRST_NAME));
+            sender.setLastName(jsonMessage.has(MessageHolder.LAST_NAME) ? jsonSender.getString(MessageHolder.LAST_NAME) : "");
+
+            message.setUpdateId(jsonObject.getLong(MessageHolder.UPDATE_ID));
+            message.setCreatedDate(jsonMessage.getLong(MessageHolder.DATE));
+            if (!jsonMessage.has(MessageHolder.TEXT)) {
+                return null;
+            }
+
+            message.setText(formatText(jsonMessage.getString(MessageHolder.TEXT)));
+
+            message.setId(jsonMessage.getLong(MessageHolder.MESSAGE_ID));
+            message.setSender(sender);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             return null;
         }
-
-        JSONObject jsonMessage = jsonObject.getJSONObject(MessageHolder.MESSAGE);
-        JSONObject jsonSender = jsonMessage.getJSONObject(MessageHolder.FROM);
-
-        sender.setId(jsonSender.getLong(MessageHolder.ID));
-        sender.setFirstName(jsonSender.getString(MessageHolder.FIRST_NAME));
-        sender.setLastName(jsonMessage.has(MessageHolder.LAST_NAME) ? jsonSender.getString(MessageHolder.LAST_NAME) : "");
-
-        message.setUpdateId(jsonObject.getLong(MessageHolder.UPDATE_ID));
-        message.setCreatedDate(jsonMessage.getLong(MessageHolder.DATE));
-        if (!jsonMessage.has(MessageHolder.TEXT)) {
-            return null;
-        }
-
-        message.setText(formatText(jsonMessage.getString(MessageHolder.TEXT)));
-
-        message.setId(jsonMessage.getLong(MessageHolder.MESSAGE_ID));
-        message.setSender(sender);
 
         return message;
     }

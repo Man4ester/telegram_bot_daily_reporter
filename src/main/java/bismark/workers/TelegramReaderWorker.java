@@ -45,6 +45,7 @@ public class TelegramReaderWorker implements Runnable {
         LOGGER.info("TOTAL MESSAGES: {}", lst.size());
         reporterService.storeReportFromMessages(lst, configService.loadUsersForReport(properties));
 
+        LOGGER.info("START Report Worker");
         ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.submit(new ReporterWorker(ctx, properties));
         executor.shutdown();
