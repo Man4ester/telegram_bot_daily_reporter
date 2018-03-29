@@ -32,7 +32,7 @@ public class TelegramReaderWorker implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.info("start");
+        LOGGER.info("START");
 
         TelegramServiceImpl telegramService = ctx.getBean(TelegramServiceImpl.class);
         ReporterServiceImpl reporterService = ctx.getBean(ReporterServiceImpl.class);
@@ -42,6 +42,7 @@ public class TelegramReaderWorker implements Runnable {
         JSONObject json = telegramService.readUpdatesForBot();
 
         List<Message> lst = messageService.readMessagesFromJSON(json);
+        LOGGER.info("TOTAL MESSAGES: {}", lst.size());
         reporterService.storeReportFromMessages(lst, configService.loadUsersForReport(properties));
 
         ExecutorService executor = Executors.newFixedThreadPool(1);

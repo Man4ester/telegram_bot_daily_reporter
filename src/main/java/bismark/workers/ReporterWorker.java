@@ -27,7 +27,7 @@ public class ReporterWorker implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.info("start");
+        LOGGER.info("START");
 
         ReporterServiceImpl reporterService = ctx.getBean(ReporterServiceImpl.class);
         reporterService.generateHTMLReport();

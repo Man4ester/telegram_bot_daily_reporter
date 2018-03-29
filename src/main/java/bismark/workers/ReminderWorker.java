@@ -37,7 +37,7 @@ public class ReminderWorker implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.info("start");
+        LOGGER.info("START");
 
         boolean active = true;
 
@@ -46,6 +46,7 @@ public class ReminderWorker implements Runnable {
             try {
                 if (isTimeToStop()) {
                     active = false;
+                    LOGGER.info("TIME TO STOP REMIND");
                     break;
                 }
 
@@ -63,6 +64,7 @@ public class ReminderWorker implements Runnable {
     private void sendMessageToRecipients() {
         LOGGER.info("sendMessageToRecipients");
         for (Long recipientId : configService.loadRecipients(properties)) {
+            LOGGER.info("WILL SEND REMIND TO: {}", recipientId);
             ExecutorService executor = Executors.newFixedThreadPool(1);
             executor.submit(new TelegramSenderWorker(recipientId, configService.getReminderMessage(properties), ctx));
             executor.shutdown();

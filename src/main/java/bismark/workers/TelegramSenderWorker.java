@@ -23,7 +23,7 @@ public class TelegramSenderWorker implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.info("start");
+        LOGGER.info("START");
         TelegramServiceImpl telegramService = ctx.getBean(TelegramServiceImpl.class);
         telegramService.sendReminderByUserId(userId, message);
     }

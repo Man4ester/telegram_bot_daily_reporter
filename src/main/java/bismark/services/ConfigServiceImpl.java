@@ -36,6 +36,7 @@ public class ConfigServiceImpl implements IConfigService {
                 try {
                     input.close();
                 } catch (IOException e) {
+                    LOGGER.error(e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -52,6 +53,7 @@ public class ConfigServiceImpl implements IConfigService {
             recipients.add(Long.parseLong(ids[i]));
         }
 
+        LOGGER.info("TOTAL USERS FOR REPORTING {}", recipients.size());
         return recipients;
     }
 

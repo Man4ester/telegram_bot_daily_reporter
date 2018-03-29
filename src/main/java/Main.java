@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 public class Main {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+
+    private static final DateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     public static void main(String[] args) {
 
@@ -38,6 +42,8 @@ public class Main {
         Date start = configService.getStartRemindDate(properties).toDate();
         Date end = configService.getEndRemindDate(properties).toDate();
         Long interval = configService.getReminderInterval(properties);
+
+        LOGGER.info("Will send remind from {} to {} with interval {}", DF.format(start), DF.format(end), interval);
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.submit(new ReminderWorker(properties, interval, start, end, ctx));
