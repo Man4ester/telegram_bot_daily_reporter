@@ -4,6 +4,8 @@ import bismark.models.Message;
 import bismark.models.Ticket;
 import bismark.services.interfaces.IReporterService;
 import bismark.utils.ReporterHolder;
+import bismark.workers.ReminderWorker;
+import bismark.workers.TelegramConfirmationWorker;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -23,6 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @Service
@@ -110,13 +114,15 @@ public class ReporterServiceImpl implements IReporterService {
     }
 
     @Override
-    public void generateHTMLReport() {
+    public List<String> generateHTMLReport() {
         LOGGER.info("generateHTMLReport");
+        Set<String> userNames = new HashSet<>();
         Map<String, List<String>> row = readRowForTodayFromDB();
         Path path = Paths.get(reportPath + generateReportFileName());
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
             for (Map.Entry<String, List<String>> r : row.entrySet()) {
                 String assignee = r.getKey();
+                userNames.add(assignee);
                 List<String> tickets = r.getValue();
 
                 writer.write(String.format(ReporterHolder.ASSIGNEE_TEMPLATE, assignee));
@@ -127,6 +133,7 @@ public class ReporterServiceImpl implements IReporterService {
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
         }
+        return new ArrayList<>(userNames);
     }
 
     private String generateReportFileName() {

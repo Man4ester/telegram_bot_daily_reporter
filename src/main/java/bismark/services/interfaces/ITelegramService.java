@@ -62,4 +62,10 @@ public interface ITelegramService {
      */
     void sendMessageToAdminAfterReportGenerated(long adminId);
 
+    /**
+     *
+     * @param userId
+     */
+    void sendConfirmationToUserByUserId(long userId);
+
 }

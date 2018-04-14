@@ -32,6 +32,6 @@ public interface IReporterService {
     /**
      * Method to generate HTML report
      */
-    void generateHTMLReport();
+    List<String> generateHTMLReport();
 
 }

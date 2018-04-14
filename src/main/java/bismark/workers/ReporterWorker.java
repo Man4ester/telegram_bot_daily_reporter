@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Properties;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ReporterWorker implements Runnable {
 
@@ -29,8 +31,16 @@ public class ReporterWorker implements Runnable {
         configService = ctx.getBean(ConfigServiceImpl.class);
 
         ReporterServiceImpl reporterService = ctx.getBean(ReporterServiceImpl.class);
-        reporterService.generateHTMLReport();
+        List<String> userNames = reporterService.generateHTMLReport();
 
+
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+
+        for (String userName : userNames) {
+            executor.submit(new TelegramConfirmationWorker(userName, ctx));
+        }
+
+        executor.shutdown();
 
         TelegramServiceImpl telegramService = ctx.getBean(TelegramServiceImpl.class);
         telegramService.sendMessageToAdminAfterReportGenerated(configService.getAdminTelegramId());

@@ -38,6 +38,9 @@ public class TelegramServiceImpl implements ITelegramService {
     @Value("${reportGeneratedMessage}")
     private String reportGeneratedMessage;
 
+    @Value("${confirmationMessage}")
+    private String confirmationMessage;
+
 
     @Override
     public String getUrlForSendMessage() {
@@ -72,6 +75,13 @@ public class TelegramServiceImpl implements ITelegramService {
     public void sendMessageToAdminAfterReportGenerated(long adminId) {
         String url = getUrlForSendMessage();
         List<NameValuePair> urlParameters = addVariablesForRequest(adminId, reportGeneratedMessage);
+        callToTelegramAPI(url, urlParameters);
+    }
+
+    @Override
+    public void sendConfirmationToUserByUserId(long userId) {
+        String url = getUrlForSendMessage();
+        List<NameValuePair> urlParameters = addVariablesForRequest(userId, confirmationMessage);
         callToTelegramAPI(url, urlParameters);
     }
 
